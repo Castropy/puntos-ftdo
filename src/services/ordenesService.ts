@@ -1,6 +1,8 @@
 import {
     collection,
     addDoc,
+    doc,
+    updateDoc,
     query,
     where,
     orderBy,
@@ -9,7 +11,7 @@ import {
     type DocumentData
 } from "firebase/firestore";
 import { db } from "../firebase";
-import type { Orden, PuntoId } from "../types";
+import type { Orden, PuntoId, MotivoCategoria } from "../types";
 
 const COLLECTION_NAME = "ordenes";
 
@@ -47,12 +49,30 @@ export const createOrden = async (ordenData: {
     return docRef.id;
 };
 
+// Actualiza el estado de una orden a confirmado con su respectivo desglose monetario
+export const confirmarOrden = async (
+    ordenId: string,
+    datosConfirmacion: {
+        montoReal: number;
+        diferencia: number;
+        esExitosa: boolean;
+        motivoCategoria?: MotivoCategoria;
+        motivoDetalle?: string;
+    }
+): Promise<void> => {
+    const ordenRef = doc(db, COLLECTION_NAME, ordenId);
+    await updateDoc(ordenRef, {
+        ...datosConfirmacion,
+        status: "confirmado",
+        horaConfirmacion: serverTimestamp(),
+    });
+};
+
 // Escucha en tiempo real las ordenes activas que no han sido asociadas a un cierre de caja
 export const subscribeOrdenesActivas = (
     onUpdate: (ordenes: Orden[]) => void,
     onError: (error: Error) => void
 ) => {
-    // Consulta documentos donde cierreId no exista o sea nulo
     const q = query(
         collection(db, COLLECTION_NAME),
         where("cierreId", "==", null),
