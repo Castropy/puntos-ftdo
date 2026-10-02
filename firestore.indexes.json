@@ -1,0 +1,29 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "ordenes",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "cierreId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "horaCreacion",
+                    "order": "DESCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "cierres",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "fechaCierre",
+                    "order": "DESCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}
