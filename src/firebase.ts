@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Define la estructura de configuración requerida por el SDK de Firebase
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,10 +11,9 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Inicializa la instancia principal de la aplicación de Firebase
+// Inicializar la aplicación de Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exporta las instancias de los servicios de Autenticación y Firestore
+// Exportar instancias de servicios
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export default app;
