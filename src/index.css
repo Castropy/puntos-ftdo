@@ -1,8 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Define el comportamiento global de la tipografía y el fondo de la aplicación */
+@theme {
+  --color-farmatodo-blue: #002B66;
+  --color-farmatodo-blueHover: #001F4B;
+  --color-farmatodo-red: #E30613;
+  --color-farmatodo-lightBg: #F4F6F9;
+  --color-farmatodo-card: #FFFFFF;
+  --color-farmatodo-textPrimary: #1E293B;
+  --color-farmatodo-textSecondary: #64748B;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
