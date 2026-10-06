@@ -6,10 +6,20 @@ interface TransaccionesExitosasPorFechaProps {
     ordenes: Orden[];
 }
 
+// Auxiliar para formatear fecha a YYYY-MM-DD en hora local
+const toLocalDateString = (d: Date): string => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 export const TransaccionesExitosasPorFecha: React.FC<TransaccionesExitosasPorFechaProps> = ({ ordenes }) => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const [fechaInicio, setFechaInicio] = useState<string>(todayStr);
-    const [fechaFin, setFechaFin] = useState<string>(todayStr);
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [fechaInicio, setFechaInicio] = useState<string>(toLocalDateString(firstDayOfMonth));
+    const [fechaFin, setFechaFin] = useState<string>(toLocalDateString(now));
 
     const { exitosas, total, tasaExito } = useMemo(() => {
         const filtradas = ordenes.filter((orden) => {
@@ -22,15 +32,15 @@ export const TransaccionesExitosasPorFecha: React.FC<TransaccionesExitosasPorFec
 
             if (isNaN(fechaOrden.getTime())) return false;
 
-            const fechaStr = fechaOrden.toISOString().split("T")[0];
+            const fechaStr = toLocalDateString(fechaOrden);
             return fechaStr >= fechaInicio && fechaStr <= fechaFin;
         });
 
-        // Verificación flexible de estado exitoso (status, estado o flags confirmadas/recibidas)
+        // Verificación flexible de estado exitoso
         const exitoConteo = filtradas.filter((o: any) => {
             const status = o.status || o.estado;
             if (status) {
-                return status === "confirmada" || status === "recibida" || status === "completed";
+                return status === "confirmado" || status === "confirmada" || status === "recibida" || status === "completed";
             }
             return o.confirmado === true || o.recibido === true;
         }).length;
