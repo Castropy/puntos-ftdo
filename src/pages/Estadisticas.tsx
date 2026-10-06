@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BarChart3, RefreshCw } from "lucide-react";
-import { subscribeOrdenesActivas } from "../services/ordenesService";
+import { subscribeTodasLasOrdenes } from "../services/ordenesService";
 import type { Orden } from "../types";
 import { TotalOrdenesPorFecha } from "../components/TotalOrdenesPorFecha";
 import { TotalBsPorFecha } from "../components/TotalBsPorFecha";
@@ -16,7 +16,7 @@ export const Estadisticas: React.FC = () => {
     useEffect(() => {
         setLoading(true);
 
-        const unsubscribe = subscribeOrdenesActivas(
+        const unsubscribe = subscribeTodasLasOrdenes(
             (ordenesActualizadas) => {
                 setOrdenes(ordenesActualizadas);
                 setLoading(false);
