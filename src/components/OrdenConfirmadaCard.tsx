@@ -45,7 +45,9 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
 
     return (
         <div
-            className={`bg-white rounded-lg border p-4 shadow-sm transition-shadow ${esExitosa ? "border-emerald-200" : "border-amber-300 bg-amber-50/30"
+            className={`bg-white rounded-lg border border-l-4 p-4 shadow-sm transition-shadow ${esExitosa
+                    ? "border-emerald-200 border-l-emerald-500"
+                    : "border-amber-300 border-l-amber-500 bg-amber-50/30"
                 }`}
         >
             <div className="space-y-2.5">
