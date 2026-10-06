@@ -54,11 +54,14 @@ export const ejecutarCierreCaja = async (
         usuarioCierreId: usuarioId,
     });
 
-    // 2. Actualizar todas las ordenes confirmadas asociandolas al cierreId en lote (batch)
+    // 2. Actualizar todas las ordenes confirmadas asociandolas al cierreId y cambiando su estado a cerrado en lote (batch)
     const batch = writeBatch(db);
     ordenesACerrar.forEach((orden) => {
         const ordenRef = doc(db, COLLECTION_ORDENES, orden.id);
-        batch.update(ordenRef, { cierreId: cierreRef.id });
+        batch.update(ordenRef, {
+            cierreId: cierreRef.id,
+            status: "cerrado"
+        });
     });
 
     await batch.commit();
