@@ -3,6 +3,7 @@ import { X, DollarSign, PackageCheck, AlertTriangle } from "lucide-react";
 import type { Orden } from "../types";
 import { ejecutarCierreCaja } from "../services/cierresService";
 import { useAuth } from "../context/AuthContext";
+import { formatBolivares } from "../utils/formatters";
 
 interface CierreCajaModalProps {
     isOpen: boolean;
@@ -102,7 +103,7 @@ export const CierreCajaModal: React.FC<CierreCajaModalProps> = ({
                                 <DollarSign className="w-5 h-5" />
                             </div>
                             <span className="text-2xl font-bold text-farmatodo-textPrimary">
-                                Bs {totalMonto.toFixed(2)}
+                                Bs. {formatBolivares(totalMonto)}
                             </span>
                         </div>
                     </div>
