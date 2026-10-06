@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { History, RefreshCw, Calendar, PackageCheck, DollarSign, AlertCircle, Filter } from "lucide-react";
 import type { CierreCaja } from "../types";
 import { getHistorialCierres } from "../services/cierresService";
+import { formatBolivares } from "../utils/formatters";
 
 // Helper para formatear una fecha/timestamp a string "YYYY-MM-DD" local
 const getLocalDateString = (timestamp: any): string => {
@@ -152,7 +153,7 @@ export const Cierres: React.FC = () => {
                                         <span>Monto Cierre</span>
                                     </div>
                                     <span className="text-lg font-bold text-emerald-800">
-                                        Bs: {cierre.totalMonto.toFixed(2)}
+                                        Bs. {formatBolivares(cierre.totalMonto)}
                                     </span>
                                 </div>
                             </div>
