@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import type { Domiciliario } from "../types";
 import { DomiciliarioModal } from "./DomiciliarioModal";
 
@@ -10,7 +10,6 @@ interface DomiciliarioSelectProps {
     onDomiciliarioCreado: (nuevo: Domiciliario) => void;
 }
 
-// Componente selector de domiciliarios con opcion de registro directo
 export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
     domiciliarios,
     selectedId,
@@ -19,7 +18,6 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
 }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-    // Procesa el cambio en la seleccion de la lista desplegable
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const id = e.target.value;
         const dom = domiciliarios.find((d) => d.id === id);
@@ -27,10 +25,15 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
         onChange(id, nombreCompleto);
     };
 
-    // Recibe el nuevo domiciliario creado y actualiza el valor seleccionado
     const handleSuccessModal = (nuevo: Domiciliario) => {
         onDomiciliarioCreado(nuevo);
         onChange(nuevo.id, `${nuevo.nombre} ${nuevo.apellido}`);
+    };
+
+    const handleOpenModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsModalOpen(true);
     };
 
     return (
@@ -57,7 +60,7 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
 
                 <button
                     type="button"
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenModal}
                     className="flex items-center space-x-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-farmatodo-textPrimary rounded-md transition-colors text-sm font-medium border border-gray-300"
                     title="Registrar nuevo domiciliario"
                 >
@@ -66,7 +69,7 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
                 </button>
             </div>
 
-            {/* Modal flotante anidado */}
+            {/* Modal flotante fuera de la jerarquía HTML del formulario */}
             <DomiciliarioModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

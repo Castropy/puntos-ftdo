@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { X, UserPlus } from "lucide-react";
 import { createDomiciliario } from "../services/domiciliariosService";
 import type { Domiciliario } from "../types";
@@ -9,7 +10,6 @@ interface DomiciliarioModalProps {
     onSuccess: (nuevoDomiciliario: Domiciliario) => void;
 }
 
-// Modal interactivo para la creacion rapida de domiciliarios
 export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
     isOpen,
     onClose,
@@ -23,9 +23,9 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
 
     if (!isOpen) return null;
 
-    // Maneja el envio del formulario y la creacion en Firestore
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        e.stopPropagation();
         setError("");
 
         if (!nombre.trim() || !apellido.trim() || !cedula.trim()) {
@@ -42,7 +42,6 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
                 cedula: cedula.trim(),
             });
 
-            // Limpia el formulario y notifica al componente padre
             setNombre("");
             setApellido("");
             setCedula("");
@@ -56,9 +55,16 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+    // Renderizamos el modal en document.body para aislar los eventos del DOM
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div
+                className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Encabezado del Modal */}
                 <div className="flex items-center justify-between px-6 py-4 bg-farmatodo-blue text-white">
                     <div className="flex items-center space-x-2">
@@ -66,7 +72,10 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
                         <h2 className="font-bold text-lg">Registrar Domiciliario</h2>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                        }}
                         type="button"
                         className="text-white/80 hover:text-white transition-colors"
                     >
@@ -124,11 +133,14 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
                         />
                     </div>
 
-                    {/* Botones de Accion */}
+                    {/* Botones de Acción */}
                     <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onClose();
+                            }}
                             className="px-4 py-2 text-sm font-medium text-farmatodo-textSecondary hover:bg-gray-100 rounded-md transition-colors"
                         >
                             Cancelar
@@ -143,6 +155,7 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

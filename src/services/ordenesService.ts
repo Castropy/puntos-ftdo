@@ -1,47 +1,66 @@
 import {
     collection,
     addDoc,
-    doc,
     updateDoc,
+    doc,
+    onSnapshot,
     query,
     where,
     orderBy,
-    onSnapshot,
-    serverTimestamp,
-    type DocumentData
+    serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase";
-import type { Orden, PuntoId, MotivoCategoria } from "../types";
+import type { Orden, MotivoCategoria } from "../types";
 
 const COLLECTION_NAME = "ordenes";
 
-// Mapea un documento de Firestore a la interfaz estricta Orden
-const mapDocumentToOrden = (docId: string, data: DocumentData): Orden => ({
-    id: docId,
-    domiciliarioId: data.domiciliarioId || "",
-    domiciliarioNombreCompleto: data.domiciliarioNombreCompleto || "",
-    montoEsperado: data.montoEsperado || 0,
-    puntoId: (data.puntoId as PuntoId) || "A1",
-    status: data.status || "pendiente",
-    esExitosa: data.esExitosa,
-    montoReal: data.montoReal,
-    diferencia: data.diferencia,
-    motivoCategoria: data.motivoCategoria,
-    motivoDetalle: data.motivoDetalle,
-    horaCreacion: data.horaCreacion,
-    horaConfirmacion: data.horaConfirmacion,
-    cierreId: data.cierreId,
-});
+// Interfaz para la actualización de confirmación de orden
+export interface ConfirmarOrdenParams {
+    montoReal: number;
+    diferencia: number;
+    esExitosa: boolean;
+    motivoCategoria?: MotivoCategoria;
+    motivoDetalle?: string;
+}
 
-// Registra una nueva orden en estado pendiente dentro de Firestore
-export const createOrden = async (ordenData: {
-    domiciliarioId: string;
-    domiciliarioNombreCompleto: string;
-    montoEsperado: number;
-    puntoId: PuntoId;
-}): Promise<string> => {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-        ...ordenData,
+// 1. Suscripción en tiempo real a las órdenes activas del turno (con orderBy para aprovechar el índice de Firestore)
+export const subscribeOrdenesActivas = (
+    onUpdate: (ordenes: Orden[]) => void,
+    onError: (error: Error) => void
+) => {
+    const ref = collection(db, COLLECTION_NAME);
+
+    const q = query(
+        ref,
+        where("status", "in", ["pendiente", "confirmado"]),
+        orderBy("horaCreacion", "desc")
+    );
+
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const ordenes: Orden[] = snapshot.docs.map((documento) => {
+                const data = documento.data();
+                return {
+                    id: documento.id,
+                    ...data,
+                } as Orden;
+            });
+            onUpdate(ordenes);
+        },
+        (error) => {
+            console.error("Error en subscribeOrdenesActivas:", error);
+            onError(error);
+        }
+    );
+};
+
+// 2. Registrar nueva orden en la colección
+export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" | "status">) => {
+    const ref = collection(db, COLLECTION_NAME);
+
+    const docRef = await addDoc(ref, {
+        ...nuevaOrden,
         status: "pendiente",
         horaCreacion: serverTimestamp(),
     });
@@ -49,46 +68,30 @@ export const createOrden = async (ordenData: {
     return docRef.id;
 };
 
-// Actualiza el estado de una orden a confirmado con su respectivo desglose monetario
+// 3. Confirmar la recepción del punto de venta filtrando campos undefined
 export const confirmarOrden = async (
     ordenId: string,
-    datosConfirmacion: {
-        montoReal: number;
-        diferencia: number;
-        esExitosa: boolean;
-        motivoCategoria?: MotivoCategoria;
-        motivoDetalle?: string;
-    }
-): Promise<void> => {
-    const ordenRef = doc(db, COLLECTION_NAME, ordenId);
-    await updateDoc(ordenRef, {
-        ...datosConfirmacion,
-        status: "confirmado",
-        horaConfirmacion: serverTimestamp(),
-    });
-};
-
-// Escucha en tiempo real las ordenes activas que no han sido asociadas a un cierre de caja
-export const subscribeOrdenesActivas = (
-    onUpdate: (ordenes: Orden[]) => void,
-    onError: (error: Error) => void
+    datosConfirmacion: ConfirmarOrdenParams
 ) => {
-    const q = query(
-        collection(db, COLLECTION_NAME),
-        where("cierreId", "==", null),
-        orderBy("horaCreacion", "desc")
-    );
+    const docRef = doc(db, COLLECTION_NAME, ordenId);
 
-    return onSnapshot(
-        q,
-        (querySnapshot) => {
-            const ordenes = querySnapshot.docs.map((doc) =>
-                mapDocumentToOrden(doc.id, doc.data())
-            );
-            onUpdate(ordenes);
-        },
-        (error) => {
-            onError(error);
-        }
-    );
+    // Construimos el payload básico con valores definidos
+    const updatePayload: Record<string, any> = {
+        status: "confirmado",
+        montoReal: datosConfirmacion.montoReal,
+        diferencia: datosConfirmacion.diferencia,
+        esExitosa: datosConfirmacion.esExitosa,
+        horaConfirmacion: serverTimestamp(),
+    };
+
+    // Solo adjuntamos los campos opcionales si vienen definidos
+    if (datosConfirmacion.motivoCategoria !== undefined) {
+        updatePayload.motivoCategoria = datosConfirmacion.motivoCategoria;
+    }
+
+    if (datosConfirmacion.motivoDetalle !== undefined && datosConfirmacion.motivoDetalle !== "") {
+        updatePayload.motivoDetalle = datosConfirmacion.motivoDetalle;
+    }
+
+    await updateDoc(docRef, updatePayload);
 };

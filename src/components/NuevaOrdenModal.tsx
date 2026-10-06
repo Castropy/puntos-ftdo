@@ -11,7 +11,7 @@ interface NuevaOrdenModalProps {
     onDomiciliarioCreado: (nuevo: Domiciliario) => void;
 }
 
-// Modal para la creacion e inicio del flujo de salida de un punto externo
+// Modal para la creación e inicio del flujo de salida de un punto externo
 export const NuevaOrdenModal: React.FC<NuevaOrdenModalProps> = ({
     isOpen,
     onClose,
@@ -27,15 +27,16 @@ export const NuevaOrdenModal: React.FC<NuevaOrdenModalProps> = ({
 
     if (!isOpen) return null;
 
-    // Actualiza la seleccion del domiciliario desde el componente hijo
+    // Actualiza la selección del domiciliario desde el componente hijo
     const handleDomiciliarioChange = (id: string, nombreCompleto: string) => {
         setDomiciliarioId(id);
         setDomiciliarioNombreCompleto(nombreCompleto);
     };
 
-    // Maneja el envio e insercion de la nueva orden en Firestore
+    // Maneja el envío e inserción de la nueva orden en Firestore
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        e.stopPropagation();
         setError("");
 
         const montoNumerico = parseFloat(montoEsperado);
@@ -46,7 +47,7 @@ export const NuevaOrdenModal: React.FC<NuevaOrdenModalProps> = ({
         }
 
         if (isNaN(montoNumerico) || montoNumerico <= 0) {
-            setError("Ingrese un monto valido mayor a 0.");
+            setError("Ingrese un monto válido mayor a 0.");
             return;
         }
 
@@ -141,7 +142,7 @@ export const NuevaOrdenModal: React.FC<NuevaOrdenModalProps> = ({
                         </select>
                     </div>
 
-                    {/* Botones de Accion */}
+                    {/* Botones de Acción */}
                     <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                         <button
                             type="button"

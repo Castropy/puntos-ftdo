@@ -9,12 +9,22 @@ interface OrdenPendienteCardProps {
 
 // Formatea timestamps de Firestore o fechas a formato de hora legible HH:MM
 const formatHora = (timestamp: Orden["horaCreacion"]): string => {
-    if (!timestamp) return "--:--";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date();
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (!timestamp) return "Ahora";
+
+    // Manejo seguro para Timestamp de Firestore con método .toDate()
+    if (typeof timestamp === "object" && "toDate" in timestamp && typeof timestamp.toDate === "function") {
+        return timestamp.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    // Manejo seguro para objetos Date estándar
+    if (timestamp instanceof Date) {
+        return timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    return "--:--";
 };
 
-// Tarjeta para visualizar las ordenes que se encuentran activas en ruta
+// Tarjeta para visualizar las órdenes que se encuentran activas en ruta
 export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
     orden,
     onConfirmar,
@@ -33,7 +43,7 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
                     </div>
                 </div>
 
-                {/* Informacion del domiciliario y monto a recibir */}
+                {/* Información del domiciliario y monto a recibir */}
                 <div className="space-y-1.5">
                     <div className="flex items-center text-sm font-medium text-farmatodo-textPrimary space-x-2">
                         <User className="w-4 h-4 text-farmatodo-blue flex-shrink-0" />
@@ -47,7 +57,7 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
                 </div>
             </div>
 
-            {/* Accion de recepcion/confirmacion */}
+            {/* Acción de recepción/confirmación */}
             <div className="pt-4 mt-2 border-t border-gray-50">
                 <button
                     type="button"

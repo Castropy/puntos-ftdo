@@ -102,7 +102,7 @@ export const CierreCajaModal: React.FC<CierreCajaModalProps> = ({
                                 <DollarSign className="w-5 h-5" />
                             </div>
                             <span className="text-2xl font-bold text-farmatodo-textPrimary">
-                                ${totalMonto.toFixed(2)}
+                                Bs {totalMonto.toFixed(2)}
                             </span>
                         </div>
                     </div>
