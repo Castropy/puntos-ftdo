@@ -6,10 +6,20 @@ interface TotalOrdenesPorFechaProps {
     ordenes: Orden[];
 }
 
+// Auxiliar para formatear fecha a YYYY-MM-DD en hora local
+const toLocalDateString = (d: Date): string => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 export const TotalOrdenesPorFecha: React.FC<TotalOrdenesPorFechaProps> = ({ ordenes }) => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const [fechaInicio, setFechaInicio] = useState<string>(todayStr);
-    const [fechaFin, setFechaFin] = useState<string>(todayStr);
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [fechaInicio, setFechaInicio] = useState<string>(toLocalDateString(firstDayOfMonth));
+    const [fechaFin, setFechaFin] = useState<string>(toLocalDateString(now));
 
     const ordenesFiltradas = useMemo(() => {
         return ordenes.filter((orden) => {
@@ -22,7 +32,7 @@ export const TotalOrdenesPorFecha: React.FC<TotalOrdenesPorFechaProps> = ({ orde
 
             if (isNaN(fechaOrden.getTime())) return false;
 
-            const fechaStr = fechaOrden.toISOString().split("T")[0];
+            const fechaStr = toLocalDateString(fechaOrden);
             return fechaStr >= fechaInicio && fechaStr <= fechaFin;
         });
     }, [ordenes, fechaInicio, fechaFin]);
