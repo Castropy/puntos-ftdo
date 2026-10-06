@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import type { Orden, MotivoCategoria } from "../types";
 import { confirmarOrden } from "../services/ordenesService";
+import { formatBolivares } from "../utils/formatters";
 
 interface ConfirmarOrdenModalProps {
     orden: Orden | null;
@@ -119,7 +120,7 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                         <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
                             <span className="text-xs text-farmatodo-textSecondary">Monto Esperado:</span>
                             <span className="text-base font-bold text-farmatodo-blue">
-                                Bs. {montoEsperado.toFixed(2)}
+                                Bs. {formatBolivares(montoEsperado)}
                             </span>
                         </div>
                     </div>
@@ -136,7 +137,7 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                             value={montoReal}
                             onChange={(e) => setMontoReal(e.target.value)}
                             onFocus={(e) => e.target.select()}
-                            placeholder={`Ej. ${montoEsperado.toFixed(2)}`}
+                            placeholder={`Ej. ${formatBolivares(montoEsperado)}`}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm font-semibold text-farmatodo-textPrimary"
                         />
                     </div>
@@ -148,7 +149,7 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                                 <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
                                 <span>
                                     Discrepancia detectada: {diferencia > 0 ? "+" : ""}
-                                    Bs. {diferencia.toFixed(2)}
+                                    Bs. {formatBolivares(diferencia)}
                                 </span>
                             </div>
 
