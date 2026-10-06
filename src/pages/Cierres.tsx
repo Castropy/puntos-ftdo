@@ -19,10 +19,11 @@ export const Cierres: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
+    // Fecha actual para el limite del selector
+    const todayStr = getLocalDateString(new Date());
+
     // Estado para la fecha seleccionada en el input (Por defecto hoy "YYYY-MM-DD")
-    const [selectedDate, setSelectedDate] = useState<string>(() => {
-        return getLocalDateString(new Date());
-    });
+    const [selectedDate, setSelectedDate] = useState<string>(todayStr);
 
     const cargarHistorial = async () => {
         setLoading(true);
@@ -55,6 +56,17 @@ export const Cierres: React.FC = () => {
         });
     };
 
+    // Maneja el cambio de fecha impidiendo seleccionar fechas futuras
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (!val) return;
+        if (val > todayStr) {
+            setSelectedDate(todayStr);
+        } else {
+            setSelectedDate(val);
+        }
+    };
+
     // Filtrar los cierres segun la fecha seleccionada por el usuario
     const cierresFiltrados = cierres.filter(
         (cierre) => getLocalDateString(cierre.fechaCierre) === selectedDate
@@ -81,7 +93,8 @@ export const Cierres: React.FC = () => {
                         <input
                             type="date"
                             value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
+                            max={todayStr}
+                            onChange={handleDateChange}
                             className="bg-transparent text-sm text-farmatodo-textPrimary focus:outline-none cursor-pointer"
                         />
                     </div>
