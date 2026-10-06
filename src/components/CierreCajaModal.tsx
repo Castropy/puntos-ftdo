@@ -23,7 +23,7 @@ export const CierreCajaModal: React.FC<CierreCajaModalProps> = ({
 
     if (!isOpen) return null;
 
-    // Calculo total del monto cobrado en el turno actual
+    // Cálculo total del monto cobrado en el corte actual
     const totalMonto = ordenesConfirmadas.reduce(
         (acc, orden) => acc + (orden.montoReal ?? orden.montoEsperado),
         0
@@ -80,8 +80,8 @@ export const CierreCajaModal: React.FC<CierreCajaModalProps> = ({
                     )}
 
                     <p className="text-sm text-farmatodo-textSecondary">
-                        Al realizar el cierre, todas las órdenes confirmadas del turno actual
-                        se consolidarán y la vista del Dashboard se reiniciará para el siguiente turno.
+                        Al realizar el cierre, todas las órdenes recibidas desde el último corte
+                        se consolidarán y la vista del Dashboard se reiniciará para el siguiente tramo del día.
                     </p>
 
                     {/* Tarjetas de Resumen */}
@@ -109,11 +109,11 @@ export const CierreCajaModal: React.FC<CierreCajaModalProps> = ({
 
                     <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded text-xs text-amber-800">
                         <strong>Atención:</strong> Esta acción asociará {ordenesConfirmadas.length} órdenes
-                        a un nuevo corte contable. Asegúrese de haber recibido todos los dispositivos antes de proceder.
+                        a este nuevo corte contable. Asegúrese de haber recibido todos los dispositivos antes de proceder.
                     </div>
                 </div>
 
-                {/* Botones de Accion */}
+                {/* Botones de Acción */}
                 <div className="flex items-center justify-end space-x-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
                     <button
                         type="button"
