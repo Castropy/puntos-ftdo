@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Archive, RefreshCw, AlertCircle } from "lucide-react";
+import { Plus, Archive, RefreshCw, AlertCircle, Calendar } from "lucide-react";
 import type { Domiciliario, Orden } from "../types";
 import { getDomiciliarios } from "../services/domiciliariosService";
 import { subscribeOrdenesActivas } from "../services/ordenesService";
@@ -8,6 +8,22 @@ import { OrdenConfirmadaCard } from "../components/OrdenConfirmadaCard";
 import { NuevaOrdenModal } from "../components/NuevaOrdenModal";
 import { ConfirmarOrdenModal } from "../components/ConfirmarOrdenModal";
 import { CierreCajaModal } from "../components/CierreCajaModal";
+
+// Extrae una clave de fecha legible (ej. "28 de Febrero, 2026") a partir del timestamp
+const obtenerFechaLegible = (timestamp: Orden["horaConfirmacion"] | Orden["horaCreacion"]): string => {
+    if (!timestamp) return "Fecha sin registrar";
+    const date = typeof timestamp === "object" && "toDate" in timestamp && typeof timestamp.toDate === "function"
+        ? timestamp.toDate()
+        : timestamp instanceof Date ? timestamp : null;
+
+    if (!date) return "Fecha sin registrar";
+
+    return date.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+};
 
 // Dashboard principal con monitoreo en tiempo real y cierre de caja
 export const Dashboard: React.FC = () => {
@@ -61,6 +77,16 @@ export const Dashboard: React.FC = () => {
     // Clasificación de órdenes por estado
     const ordenesPendientes = ordenes.filter((o) => o.status === "pendiente");
     const ordenesConfirmadas = ordenes.filter((o) => o.status === "confirmado");
+
+    // Agrupa las órdenes confirmadas por fecha legible
+    const ordenesConfirmadasPorFecha = ordenesConfirmadas.reduce<Record<string, Orden[]>>((acumulador, orden) => {
+        const fechaClave = obtenerFechaLegible(orden.horaConfirmacion || orden.horaCreacion);
+        if (!acumulador[fechaClave]) {
+            acumulador[fechaClave] = [];
+        }
+        acumulador[fechaClave].push(orden);
+        return acumulador;
+    }, {});
 
     return (
         <div className="space-y-6">
@@ -137,7 +163,7 @@ export const Dashboard: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Sección 2: Órdenes Confirmadas (Turno Activo) */}
+                    {/* Sección 2: Órdenes Confirmadas Agrupadas por Fecha */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h2 className="text-base font-bold text-farmatodo-textPrimary flex items-center gap-2">
@@ -153,9 +179,27 @@ export const Dashboard: React.FC = () => {
                                 Aún no se han recibido puntos en este turno.
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {ordenesConfirmadas.map((orden) => (
-                                    <OrdenConfirmadaCard key={orden.id} orden={orden} />
+                            <div className="space-y-6">
+                                {Object.entries(ordenesConfirmadasPorFecha).map(([fecha, listaOrdenes]) => (
+                                    <div key={fecha} className="space-y-3">
+                                        {/* Encabezado con la fecha de las órdenes */}
+                                        <div className="flex items-center space-x-2 pb-1 border-b border-gray-200">
+                                            <Calendar className="w-4 h-4 text-farmatodo-blue" />
+                                            <h3 className="text-xs font-bold text-farmatodo-textPrimary uppercase tracking-wider">
+                                                {fecha}
+                                            </h3>
+                                            <span className="text-xs text-gray-400 font-normal">
+                                                ({listaOrdenes.length} {listaOrdenes.length === 1 ? "punto" : "puntos"})
+                                            </span>
+                                        </div>
+
+                                        {/* Renderizado de tarjetas del día */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {listaOrdenes.map((orden) => (
+                                                <OrdenConfirmadaCard key={orden.id} orden={orden} />
+                                            ))}
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         )}
