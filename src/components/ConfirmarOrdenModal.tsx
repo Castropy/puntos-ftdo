@@ -10,22 +10,30 @@ interface ConfirmarOrdenModalProps {
     onClose: () => void;
 }
 
+// Convierte un string de input (que puede contener comas o puntos) a un float numérico limpio
+const parseMontoInput = (value: string): number => {
+    if (!value) return 0;
+    // Remueve puntos de miles y cambia comas por punto decimal
+    const cleanValue = value.replace(/\./g, "").replace(",", ".");
+    return parseFloat(cleanValue);
+};
+
 // Componente modal para confirmar la recepción de puntos de venta y registrar descuadres
 export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
     orden,
     isOpen,
     onClose,
 }) => {
-    const [montoReal, setMontoReal] = useState<string>("");
+    const [montoRealInput, setMontoRealInput] = useState<string>("");
     const [motivoCategoria, setMotivoCategoria] = useState<MotivoCategoria>("efectivo_complementario");
     const [motivoDetalle, setMotivoDetalle] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
-    // Asigna el monto esperado como valor por defecto al seleccionar una orden
+    // Asigna el monto esperado como valor formateado por defecto al seleccionar una orden
     useEffect(() => {
         if (orden) {
-            setMontoReal(orden.montoEsperado.toString());
+            setMontoRealInput(formatBolivares(orden.montoEsperado));
             setMotivoDetalle("");
             setError("");
         }
@@ -34,9 +42,24 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
     if (!isOpen || !orden) return null;
 
     const montoEsperado = orden.montoEsperado;
-    const montoRealNum = parseFloat(montoReal) || 0;
+    const montoRealNum = parseMontoInput(montoRealInput);
     const diferencia = montoRealNum - montoEsperado;
-    const hayDiferencia = montoReal !== "" && Math.abs(diferencia) > 0.01;
+    const hayDiferencia = montoRealInput !== "" && Math.abs(diferencia) > 0.01;
+
+    // Formatea el valor al perder el foco (onBlur) para mostrar la sintaxis VE (1.234,56)
+    const handleMontoBlur = () => {
+        if (!isNaN(montoRealNum) && montoRealNum > 0) {
+            setMontoRealInput(formatBolivares(montoRealNum));
+        }
+    };
+
+    // Al enfocar (onFocus), prepara el string para facilitar la edición sin puntos de miles
+    const handleMontoFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        if (!isNaN(montoRealNum) && montoRealNum > 0) {
+            setMontoRealInput(montoRealNum.toString().replace(".", ","));
+        }
+        e.target.select();
+    };
 
     // Maneja el procesamiento y la confirmación de la orden
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -125,21 +148,33 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                         </div>
                     </div>
 
-                    {/* Campo para ingresar el monto real cobrado */}
+                    {/* Campo formateado para ingresar el monto real cobrado */}
                     <div>
                         <label className="block text-sm font-medium text-farmatodo-textPrimary mb-1">
-                            Monto Real Cobrado (Bs.)
+                            Monto Real Cobrado
                         </label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            required
-                            value={montoReal}
-                            onChange={(e) => setMontoReal(e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            placeholder={`Ej. ${formatBolivares(montoEsperado)}`}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm font-semibold text-farmatodo-textPrimary"
-                        />
+                        <div className="relative rounded-md shadow-sm">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span className="text-gray-500 font-semibold text-sm">Bs.</span>
+                            </div>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                required
+                                value={montoRealInput}
+                                onChange={(e) => setMontoRealInput(e.target.value)}
+                                onBlur={handleMontoBlur}
+                                onFocus={handleMontoFocus}
+                                placeholder={`Ej. ${formatBolivares(montoEsperado)}`}
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm font-bold text-farmatodo-textPrimary"
+                            />
+                        </div>
+                        {/* Previsualización del formato VE durante la edicion */}
+                        {montoRealInput && !isNaN(montoRealNum) && montoRealNum > 0 && (
+                            <p className="mt-1 text-xs text-farmatodo-textSecondary text-right">
+                                Confirmado: <span className="font-bold text-farmatodo-blue">Bs. {formatBolivares(montoRealNum)}</span>
+                            </p>
+                        )}
                     </div>
 
                     {/* Sección condicional para indicar discrepancias */}
