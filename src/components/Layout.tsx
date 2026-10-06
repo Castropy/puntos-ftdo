@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { LogOut, LayoutDashboard, History, AlertTriangle, X } from "lucide-react";
+import { LogOut, LayoutDashboard, History, BarChart3, AlertTriangle, X } from "lucide-react";
 import { auth } from "../firebase";
 
 // Componente de estructura principal con navegación para rutas autenticadas
@@ -57,6 +57,17 @@ export const Layout: React.FC = () => {
                         >
                             <History className="w-4 h-4" />
                             <span>Cierres</span>
+                        </Link>
+
+                        <Link
+                            to="/estadisticas"
+                            className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/estadisticas")
+                                ? "bg-white/10 text-white"
+                                : "text-blue-100 hover:bg-white/5 hover:text-white"
+                                }`}
+                        >
+                            <BarChart3 className="w-4 h-4" />
+                            <span>Estadísticas</span>
                         </Link>
 
                         <button
