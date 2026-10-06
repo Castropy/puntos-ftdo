@@ -11,12 +11,10 @@ interface OrdenPendienteCardProps {
 const formatHora = (timestamp: Orden["horaCreacion"]): string => {
     if (!timestamp) return "Ahora";
 
-    // Manejo seguro para Timestamp de Firestore con método .toDate()
     if (typeof timestamp === "object" && "toDate" in timestamp && typeof timestamp.toDate === "function") {
         return timestamp.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
-    // Manejo seguro para objetos Date estándar
     if (timestamp instanceof Date) {
         return timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
@@ -30,16 +28,16 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
     onConfirmar,
 }) => {
     return (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
+        <div className="bg-amber-50/20 rounded-lg border border-amber-200 border-l-4 border-l-amber-500 shadow-sm p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
             <div className="space-y-3">
                 {/* Encabezado con Punto asignado y Hora */}
-                <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <div className="flex items-center justify-between border-b border-amber-100 pb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
                         Punto {orden.puntoId}
                     </span>
                     <div className="flex items-center text-xs text-farmatodo-textSecondary space-x-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{formatHora(orden.horaCreacion)}</span>
+                        <Clock className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="font-medium">{formatHora(orden.horaCreacion)}</span>
                     </div>
                 </div>
 
@@ -58,7 +56,7 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
             </div>
 
             {/* Acción de recepción/confirmación */}
-            <div className="pt-4 mt-2 border-t border-gray-50">
+            <div className="pt-4 mt-2 border-t border-amber-100">
                 <button
                     type="button"
                     onClick={() => onConfirmar(orden)}
