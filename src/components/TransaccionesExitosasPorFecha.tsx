@@ -36,13 +36,18 @@ export const TransaccionesExitosasPorFecha: React.FC<TransaccionesExitosasPorFec
             return fechaStr >= fechaInicio && fechaStr <= fechaFin;
         });
 
-        // Verificación flexible de estado exitoso
+        // Una transacción es exitosa si `esExitosa` es true,
+        // o si no hay discrepancia entre montoReal y montoEsperado.
         const exitoConteo = filtradas.filter((o: any) => {
-            const status = o.status || o.estado;
-            if (status) {
-                return status === "confirmado" || status === "confirmada" || status === "recibida" || status === "completed";
+            if (typeof o.esExitosa === "boolean") {
+                return o.esExitosa;
             }
-            return o.confirmado === true || o.recibido === true;
+
+            const esperado = o.montoEsperado ?? 0;
+            const real = o.montoReal ?? esperado;
+            const dif = o.diferencia ?? (real - esperado);
+
+            return Math.abs(dif) < 0.01;
         }).length;
 
         const totalConteo = filtradas.length;
