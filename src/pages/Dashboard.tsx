@@ -136,18 +136,18 @@ export const Dashboard: React.FC = () => {
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Sección 1: Órdenes Pendientes (En Ruta) */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-base font-bold text-farmatodo-textPrimary flex items-center gap-2">
+                    <div className="space-y-4 bg-amber-50/30 p-4 rounded-xl border border-amber-100/80">
+                        <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
+                            <h2 className="text-base font-bold text-amber-950 flex items-center gap-2">
                                 <span>Puntos en Ruta</span>
-                                <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-semibold">
+                                <span className="px-2.5 py-0.5 text-xs bg-amber-200/80 text-amber-900 rounded-full font-bold">
                                     {ordenesPendientes.length}
                                 </span>
                             </h2>
                         </div>
 
                         {ordenesPendientes.length === 0 ? (
-                            <div className="bg-white p-8 text-center rounded-lg border border-dashed border-gray-300 text-farmatodo-textSecondary text-sm">
+                            <div className="bg-white p-8 text-center rounded-lg border border-dashed border-amber-200 text-amber-800/60 text-sm">
                                 No hay puntos asignados en la calle actualmente.
                             </div>
                         ) : (
@@ -164,18 +164,18 @@ export const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Sección 2: Órdenes Confirmadas Agrupadas por Fecha */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-base font-bold text-farmatodo-textPrimary flex items-center gap-2">
+                    <div className="space-y-4 bg-emerald-50/30 p-4 rounded-xl border border-emerald-100/80">
+                        <div className="flex items-center justify-between pb-2 border-b border-emerald-200/60">
+                            <h2 className="text-base font-bold text-emerald-950 flex items-center gap-2">
                                 <span>Puntos Recibidos (Turno Activo)</span>
-                                <span className="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-800 rounded-full font-semibold">
+                                <span className="px-2.5 py-0.5 text-xs bg-emerald-200/80 text-emerald-900 rounded-full font-bold">
                                     {ordenesConfirmadas.length}
                                 </span>
                             </h2>
                         </div>
 
                         {ordenesConfirmadas.length === 0 ? (
-                            <div className="bg-white p-8 text-center rounded-lg border border-dashed border-gray-300 text-farmatodo-textSecondary text-sm">
+                            <div className="bg-white p-8 text-center rounded-lg border border-dashed border-emerald-200 text-emerald-800/60 text-sm">
                                 Aún no se han recibido puntos en este turno.
                             </div>
                         ) : (
@@ -183,12 +183,12 @@ export const Dashboard: React.FC = () => {
                                 {Object.entries(ordenesConfirmadasPorFecha).map(([fecha, listaOrdenes]) => (
                                     <div key={fecha} className="space-y-3">
                                         {/* Encabezado con la fecha de las órdenes */}
-                                        <div className="flex items-center space-x-2 pb-1 border-b border-gray-200">
-                                            <Calendar className="w-4 h-4 text-farmatodo-blue" />
-                                            <h3 className="text-xs font-bold text-farmatodo-textPrimary uppercase tracking-wider">
+                                        <div className="flex items-center space-x-2 pb-1 border-b border-emerald-200/40">
+                                            <Calendar className="w-4 h-4 text-emerald-700" />
+                                            <h3 className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
                                                 {fecha}
                                             </h3>
-                                            <span className="text-xs text-gray-400 font-normal">
+                                            <span className="text-xs text-emerald-700 font-normal">
                                                 ({listaOrdenes.length} {listaOrdenes.length === 1 ? "punto" : "puntos"})
                                             </span>
                                         </div>
