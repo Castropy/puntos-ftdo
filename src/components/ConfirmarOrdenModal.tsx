@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, CheckCircle2, AlertTriangle } from "lucide-react";
+import { X, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import type { Orden, MotivoCategoria } from "../types";
 import { confirmarOrden } from "../services/ordenesService";
 
@@ -102,6 +102,14 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                         </div>
                     )}
 
+                    {/* Banner informativo de ayuda visual */}
+                    <div className="flex items-start space-x-2.5 p-3 bg-blue-50 border border-blue-100 rounded-md text-xs text-blue-900">
+                        <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <p>
+                            El monto coincide con el registrado. <span className="font-semibold">Si el cobro fue diferente</span>, modifique la cifra para indicar el motivo de la diferencia.
+                        </p>
+                    </div>
+
                     {/* Resumen del domiciliario y monto esperado */}
                     <div className="bg-gray-50 p-3 rounded-md border border-gray-100 space-y-1">
                         <p className="text-xs text-farmatodo-textSecondary">Domiciliario:</p>
@@ -129,11 +137,8 @@ export const ConfirmarOrdenModal: React.FC<ConfirmarOrdenModalProps> = ({
                             onChange={(e) => setMontoReal(e.target.value)}
                             onFocus={(e) => e.target.select()}
                             placeholder={`Ej. ${montoEsperado.toFixed(2)}`}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm font-semibold text-farmatodo-textPrimary"
                         />
-                        <p className="text-[11px] text-gray-500 mt-1">
-                            El campo se completa automáticamente con el monto esperado para agilizar la confirmación.
-                        </p>
                     </div>
 
                     {/* Sección condicional para indicar discrepancias */}
