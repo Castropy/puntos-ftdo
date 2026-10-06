@@ -23,16 +23,18 @@ export interface ConfirmarOrdenParams {
     motivoDetalle?: string;
 }
 
-// 1. Suscripción en tiempo real a las órdenes activas del turno (con orderBy para aprovechar el índice de Firestore)
+// 1. Suscripción en tiempo real a las órdenes activas del turno (excluye las que ya pertenecen a un cierre)
 export const subscribeOrdenesActivas = (
     onUpdate: (ordenes: Orden[]) => void,
     onError: (error: Error) => void
 ) => {
     const ref = collection(db, COLLECTION_NAME);
 
+    // Consultamos únicamente órdenes activas que no han sido liquidadas en un cierre previo
     const q = query(
         ref,
         where("status", "in", ["pendiente", "confirmado"]),
+        where("cierreId", "==", null),
         orderBy("horaCreacion", "desc")
     );
 
@@ -62,6 +64,7 @@ export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" 
     const docRef = await addDoc(ref, {
         ...nuevaOrden,
         status: "pendiente",
+        cierreId: null, // Se inicializa sin asignación de cierre
         horaCreacion: serverTimestamp(),
     });
 
