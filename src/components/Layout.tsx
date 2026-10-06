@@ -27,7 +27,7 @@ export const Layout: React.FC = () => {
         <div className="min-h-screen flex flex-col bg-farmatodo-lightBg">
             {/* Encabezado principal superior */}
             <header className="bg-farmatodo-blue text-white shadow-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <span className="font-bold text-xl tracking-tight">FARMATODO</span>
                         <span className="hidden sm:inline text-xs bg-white/20 px-2 py-0.5 rounded text-white font-medium">
@@ -82,8 +82,8 @@ export const Layout: React.FC = () => {
                 </div>
             </header>
 
-            {/* Contenedor dinámico de vistas hijas */}
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* Contenedor dinámico de vistas hijas con mayor amplitud horizontal */}
+            <main className="flex-1 max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <Outlet />
             </main>
 
