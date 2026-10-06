@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, AlertTriangle, Clock, User, Timer } from "lucide-react";
 import type { Orden } from "../types";
+import { formatBolivares } from "../utils/formatters";
 
 interface OrdenConfirmadaCardProps {
     orden: Orden;
@@ -46,8 +47,8 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
     return (
         <div
             className={`bg-white rounded-lg border border-l-4 p-4 shadow-sm transition-shadow ${esExitosa
-                    ? "border-emerald-200 border-l-emerald-500"
-                    : "border-amber-300 border-l-amber-500 bg-amber-50/30"
+                ? "border-emerald-200 border-l-emerald-500"
+                : "border-amber-300 border-l-amber-500 bg-amber-50/30"
                 }`}
         >
             <div className="space-y-2.5">
@@ -61,8 +62,8 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
                         )}
                         <span
                             className={`text-xs font-semibold px-2 py-0.5 rounded ${esExitosa
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-amber-100 text-amber-800"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
                                 }`}
                         >
                             {esExitosa ? "Sin Discrepancia" : "Con Discrepancia"}
@@ -99,11 +100,11 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
                 <div className="pt-2 text-xs space-y-1 bg-gray-50 p-2 rounded border border-gray-100">
                     <div className="flex justify-between text-gray-600">
                         <span>Monto Esperado:</span>
-                        <span>Bs. {orden.montoEsperado.toFixed(2)}</span>
+                        <span>Bs. {formatBolivares(orden.montoEsperado)}</span>
                     </div>
                     <div className="flex justify-between font-semibold text-farmatodo-textPrimary">
                         <span>Monto Real:</span>
-                        <span>Bs. {(orden.montoReal ?? orden.montoEsperado).toFixed(2)}</span>
+                        <span>Bs. {formatBolivares(orden.montoReal ?? orden.montoEsperado)}</span>
                     </div>
                     {orden.diferencia !== undefined && orden.diferencia !== 0 && (
                         <div
@@ -113,7 +114,7 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
                             <span>Diferencia:</span>
                             <span>
                                 {orden.diferencia > 0 ? "+" : ""}
-                                Bs. {orden.diferencia.toFixed(2)}
+                                Bs. {formatBolivares(orden.diferencia)}
                             </span>
                         </div>
                     )}
