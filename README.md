@@ -1,32 +1,48 @@
-# React + TypeScript + Vite
+# 🛒 Farmatodo - Puntos Externos
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Sistema web de gestión, control de cierres de caja y analítica financiera para la administración de transacciones e iteración de domiciliarios en puntos de entrega externos de Farmatodo.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Características Clave
 
-## React Compiler
+* **Dashboard Operativo:** Registro y monitoreo en tiempo real de transacciones por domiciliario.
+* **Módulo de Estadísticas y Analítica:**
+  * Métricas financieras globales y filtrado por rango de fechas/turnos.
+  * Cálculo de efectividad considerando métricas reales vs. esperadas (`montoReal` vs `montoEsperado`).
+  * Layout responsivo de alta amplitud (`max-w-[1800px]`) optimizado para grandes volúmenes de datos.
+* **Historial de Cierres de Caja:**
+  * Consulta por fecha con restricción de selección (sin fechas futuras).
+  * Consolidado automático de montos y totales por turno.
+* **Gestión de Domiciliarios:** Registro dinámico y formateo automático de cédulas de identidad venezolanas.
+* **Rutas Autenticadas:** Seguridad en cliente vinculada a Firebase Auth con confirmación de cierre de sesión.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 🛠️ Stack Tecnológico
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+* **Frontend:** React 18, TypeScript, Vite.
+* **Estilos & UI:** Tailwind CSS, Lucide React (iconografía).
+* **Enrutamiento:** React Router DOM v6.
+* **Backend & BD:** Firebase (Firestore & Authentication).
+* **Despliegue & Hosting:** Cloudflare Pages (Edge Network CDN).
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+---
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 📁 Estructura del Proyecto
+
+```text
+puntos-farmatodo/
+├── public/
+│   ├── _redirects          # Regla de fallback SPA para React Router en Cloudflare
+│   └── favicon.svg         # Ícono POS personalizado en formato vector
+├── src/
+│   ├── components/         # Componentes modulares (Modal, Selects, Layout)
+│   ├── pages/              # Vistas principales (Dashboard, Cierres, Estadísticas)
+│   ├── services/           # Consultas e integración con Firebase Firestore
+│   ├── types/              # Definiciones e interfaces de TypeScript
+│   ├── utils/              # Formateadores (moneda local Bs, cédulas, fechas)
+│   ├── firebase.ts         # Inicialización de SDK de Firebase
+│   └── main.tsx            # Punto de entrada de la aplicación
+├── package.json
+└── vite.config.ts
