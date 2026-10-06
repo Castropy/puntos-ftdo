@@ -8,6 +8,7 @@ import { OrdenConfirmadaCard } from "../components/OrdenConfirmadaCard";
 import { NuevaOrdenModal } from "../components/NuevaOrdenModal";
 import { ConfirmarOrdenModal } from "../components/ConfirmarOrdenModal";
 import { CierreCajaModal } from "../components/CierreCajaModal";
+import { ResumenMontoActual } from "../components/ResumenMontoActual";
 
 // Extrae una clave de fecha legible (ej. "28 de Febrero, 2026") a partir del timestamp
 const obtenerFechaLegible = (timestamp: Orden["horaConfirmacion"] | Orden["horaCreacion"]): string => {
@@ -78,6 +79,12 @@ export const Dashboard: React.FC = () => {
     const ordenesPendientes = ordenes.filter((o) => o.status === "pendiente");
     const ordenesConfirmadas = ordenes.filter((o) => o.status === "confirmado");
 
+    // Prepara las transacciones del turno activo para el resumen financiero
+    const transaccionesTurno = ordenesConfirmadas.map((orden) => ({
+        punto: orden.puntoId,
+        monto: orden.montoReal ?? orden.montoEsperado ?? 0,
+    }));
+
     // Agrupa las órdenes confirmadas por fecha legible
     const ordenesConfirmadasPorFecha = ordenesConfirmadas.reduce<Record<string, Orden[]>>((acumulador, orden) => {
         const fechaClave = obtenerFechaLegible(orden.horaConfirmacion || orden.horaCreacion);
@@ -120,6 +127,9 @@ export const Dashboard: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Tarjeta con Arqueo / Dinero Esperado por Punto (A1 - A4) */}
+            <ResumenMontoActual transaccionesTurno={transaccionesTurno} />
 
             {error && (
                 <div className="flex items-center space-x-2 p-4 bg-red-50 border-l-4 border-farmatodo-red text-farmatodo-red text-sm rounded">
