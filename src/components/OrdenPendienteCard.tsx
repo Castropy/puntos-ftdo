@@ -1,7 +1,9 @@
 import React from "react";
 import { Clock, CreditCard, User, ArrowRightCircle } from "lucide-react";
 import type { Orden } from "../types";
+import { formatBolivares } from "../utils/formatters";
 
+// Definición de las propiedades del componente
 interface OrdenPendienteCardProps {
     orden: Orden;
     onConfirmar: (orden: Orden) => void;
@@ -50,7 +52,7 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
 
                     <div className="flex items-center text-lg font-bold text-farmatodo-blue space-x-2 pt-1">
                         <CreditCard className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <span>Bs. {orden.montoEsperado.toFixed(2)}</span>
+                        <span>Bs. {formatBolivares(orden.montoEsperado)}</span>
                     </div>
                 </div>
             </div>
