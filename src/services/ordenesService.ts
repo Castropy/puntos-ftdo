@@ -57,7 +57,36 @@ export const subscribeOrdenesActivas = (
     );
 };
 
-// 2. Registrar nueva orden en la colección
+// 2. Suscripción en tiempo real a TODAS las órdenes (para Estadísticas e Históricos)
+export const subscribeTodasLasOrdenes = (
+    onUpdate: (ordenes: Orden[]) => void,
+    onError: (error: Error) => void
+) => {
+    const ref = collection(db, COLLECTION_NAME);
+
+    // Consultamos la totalidad de las órdenes ordenadas cronológicamente
+    const q = query(ref, orderBy("horaCreacion", "desc"));
+
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const ordenes: Orden[] = snapshot.docs.map((documento) => {
+                const data = documento.data();
+                return {
+                    id: documento.id,
+                    ...data,
+                } as Orden;
+            });
+            onUpdate(ordenes);
+        },
+        (error) => {
+            console.error("Error en subscribeTodasLasOrdenes:", error);
+            onError(error);
+        }
+    );
+};
+
+// 3. Registrar nueva orden en la colección
 export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" | "status">) => {
     const ref = collection(db, COLLECTION_NAME);
 
@@ -71,7 +100,7 @@ export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" 
     return docRef.id;
 };
 
-// 3. Confirmar la recepción del punto de venta filtrando campos undefined
+// 4. Confirmar la recepción del punto de venta filtrando campos undefined
 export const confirmarOrden = async (
     ordenId: string,
     datosConfirmacion: ConfirmarOrdenParams
