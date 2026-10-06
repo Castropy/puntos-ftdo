@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { History, RefreshCw, Calendar, PackageCheck, DollarSign, AlertCircle } from "lucide-react";
+import { History, RefreshCw, Calendar, PackageCheck, DollarSign, AlertCircle, Filter } from "lucide-react";
 import type { CierreCaja } from "../types";
 import { getHistorialCierres } from "../services/cierresService";
+
+// Helper para formatear una fecha/timestamp a string "YYYY-MM-DD" local
+const getLocalDateString = (timestamp: any): string => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
 
 export const Cierres: React.FC = () => {
     const [cierres, setCierres] = useState<CierreCaja[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
+
+    // Estado para la fecha seleccionada en el input (Por defecto hoy "YYYY-MM-DD")
+    const [selectedDate, setSelectedDate] = useState<string>(() => {
+        return getLocalDateString(new Date());
+    });
 
     const cargarHistorial = async () => {
         setLoading(true);
@@ -26,7 +41,7 @@ export const Cierres: React.FC = () => {
         cargarHistorial();
     }, []);
 
-    // Formatea un Timestamp de Firestore a string legible
+    // Formatea un Timestamp de Firestore a hora y fecha legible para la tarjeta
     const formatFecha = (timestamp: any) => {
         if (!timestamp) return "Fecha no disponible";
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -39,9 +54,14 @@ export const Cierres: React.FC = () => {
         });
     };
 
+    // Filtrar los cierres segun la fecha seleccionada por el usuario
+    const cierresFiltrados = cierres.filter(
+        (cierre) => getLocalDateString(cierre.fechaCierre) === selectedDate
+    );
+
     return (
         <div className="space-y-6">
-            {/* Encabezado */}
+            {/* Encabezado con Filtro de Fecha */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <div>
                     <h1 className="text-xl font-bold text-farmatodo-textPrimary flex items-center gap-2">
@@ -49,18 +69,31 @@ export const Cierres: React.FC = () => {
                         <span>Historial de Cierres de Caja</span>
                     </h1>
                     <p className="text-sm text-farmatodo-textSecondary mt-1">
-                        Registro acumulado de cortes de turno y liquidaciones contables.
+                        Registro acumulado de cortes de turno y liquidaciones contables por fecha.
                     </p>
                 </div>
 
-                <button
-                    onClick={cargarHistorial}
-                    disabled={loading}
-                    className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-farmatodo-textSecondary hover:bg-gray-50 rounded-md text-sm font-medium transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                    <span>Actualizar</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Selector de Fecha */}
+                    <div className="flex items-center space-x-2 bg-gray-50 border border-gray-300 rounded-md px-3 py-1.5 focus-within:ring-2 focus-within:ring-farmatodo-blue">
+                        <Filter className="w-4 h-4 text-farmatodo-blue" />
+                        <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="bg-transparent text-sm text-farmatodo-textPrimary focus:outline-none cursor-pointer"
+                        />
+                    </div>
+
+                    <button
+                        onClick={cargarHistorial}
+                        disabled={loading}
+                        className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-farmatodo-textSecondary hover:bg-gray-50 rounded-md text-sm font-medium transition-colors"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                        <span>Actualizar</span>
+                    </button>
+                </div>
             </div>
 
             {error && (
@@ -75,16 +108,18 @@ export const Cierres: React.FC = () => {
                 <div className="flex justify-center items-center py-12">
                     <RefreshCw className="w-8 h-8 text-farmatodo-blue animate-spin" />
                 </div>
-            ) : cierres.length === 0 ? (
+            ) : cierresFiltrados.length === 0 ? (
                 <div className="bg-white p-12 text-center rounded-lg border border-dashed border-gray-300 text-farmatodo-textSecondary">
-                    <p className="text-base font-medium">No se han registrado cierres de caja aún.</p>
+                    <p className="text-base font-medium">
+                        No se encontraron cierres de caja registrados para la fecha seleccionada ({selectedDate}).
+                    </p>
                     <p className="text-sm mt-1 text-gray-400">
-                        Los cierres procesados desde el Dashboard aparecerán en esta vista.
+                        Prueba seleccionando otra fecha en el filtro superior.
                     </p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {cierres.map((cierre) => (
+                    {cierresFiltrados.map((cierre) => (
                         <div
                             key={cierre.id}
                             className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 space-y-4 hover:shadow-md transition-shadow"
@@ -117,7 +152,7 @@ export const Cierres: React.FC = () => {
                                         <span>Monto Cierre</span>
                                     </div>
                                     <span className="text-lg font-bold text-emerald-800">
-                                        ${cierre.totalMonto.toFixed(2)}
+                                        Bs: {cierre.totalMonto.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
