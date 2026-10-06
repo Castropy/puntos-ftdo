@@ -12,3 +12,10 @@ export const formatBolivares = (monto: number): string => {
         maximumFractionDigits: 2,
     }).format(monto);
 };
+
+// Utilidad para formato de cedulas.
+export const formatCedula = (cedula: string | number): string => {
+    if (!cedula) return "";
+    const clean = String(cedula).replace(/\D/g, "");
+    return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};

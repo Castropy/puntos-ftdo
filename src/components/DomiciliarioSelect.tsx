@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { UserPlus } from "lucide-react";
 import type { Domiciliario } from "../types";
 import { DomiciliarioModal } from "./DomiciliarioModal";
+import { formatCedula } from "../utils/formatters";
 
 interface DomiciliarioSelectProps {
     domiciliarios: Domiciliario[];
@@ -52,7 +53,7 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
                         <option value="">Seleccione un domiciliario...</option>
                         {domiciliarios.map((dom) => (
                             <option key={dom.id} value={dom.id}>
-                                {dom.nombre} {dom.apellido} ({dom.cedula})
+                                {dom.nombre} {dom.apellido} ({formatCedula(dom.cedula)})
                             </option>
                         ))}
                     </select>
