@@ -6,6 +6,14 @@ interface TiempoPuntosCalleProps {
     ordenes: Orden[];
 }
 
+// Auxiliar para formatear fecha a YYYY-MM-DD en hora local
+const toLocalDateString = (d: Date): string => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 // Auxiliar para formatear minutos totales a formato legible (Xh Ym o Z min)
 const formatDuracion = (minutosTotales: number): string => {
     if (minutosTotales <= 0) return "0 min";
@@ -17,9 +25,11 @@ const formatDuracion = (minutosTotales: number): string => {
 };
 
 export const TiempoPuntosCalle: React.FC<TiempoPuntosCalleProps> = ({ ordenes }) => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const [fechaInicio, setFechaInicio] = useState<string>(todayStr);
-    const [fechaFin, setFechaFin] = useState<string>(todayStr);
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [fechaInicio, setFechaInicio] = useState<string>(toLocalDateString(firstDayOfMonth));
+    const [fechaFin, setFechaFin] = useState<string>(toLocalDateString(now));
 
     const { tiempoTotalMinutos, tiempoPromedioMinutos, ordenesFinalizadas } = useMemo(() => {
         let minutosAcumulados = 0;
@@ -35,7 +45,7 @@ export const TiempoPuntosCalle: React.FC<TiempoPuntosCalleProps> = ({ ordenes })
 
             if (isNaN(fechaCreacion.getTime())) return;
 
-            const fechaStr = fechaCreacion.toISOString().split("T")[0];
+            const fechaStr = toLocalDateString(fechaCreacion);
 
             // Filtro por fecha
             if (fechaStr >= fechaInicio && fechaStr <= fechaFin) {
