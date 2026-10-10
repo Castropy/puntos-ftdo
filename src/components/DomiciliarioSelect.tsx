@@ -21,7 +21,7 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const id = e.target.value;
-        const dom = domiciliarios.find((d) => d.id === id);
+        const dom = Array.isArray(domiciliarios) ? domiciliarios.find((d) => d.id === id) : undefined;
         const nombreCompleto = dom ? `${dom.nombre} ${dom.apellido}` : "";
         onChange(id, nombreCompleto);
     };
@@ -51,7 +51,7 @@ export const DomiciliarioSelect: React.FC<DomiciliarioSelectProps> = ({
                         className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-farmatodo-blue text-sm"
                     >
                         <option value="">Seleccione un domiciliario...</option>
-                        {domiciliarios.map((dom) => (
+                        {Array.isArray(domiciliarios) && domiciliarios.map((dom) => (
                             <option key={dom.id} value={dom.id}>
                                 {dom.nombre} {dom.apellido} ({formatCedula(dom.cedula)})
                             </option>
