@@ -36,16 +36,31 @@ export const DomiciliarioModal: React.FC<DomiciliarioModalProps> = ({
         setLoading(true);
 
         try {
-            const nuevo = await createDomiciliario({
-                nombre: nombre.trim(),
-                apellido: apellido.trim(),
-                cedula: cedula.trim(),
+            const nombreClean = nombre.trim();
+            const apellidoClean = apellido.trim();
+            const cedulaClean = cedula.trim();
+
+            // 1. Guardar en Firestore y obtener el ID retornado
+            const nuevoId = await createDomiciliario({
+                nombre: nombreClean,
+                apellido: apellidoClean,
+                cedula: cedulaClean,
             });
+
+            // 2. Construir el objeto Domiciliario completo con su ID
+            const nuevoObj: Domiciliario = {
+                id: nuevoId,
+                nombre: nombreClean,
+                apellido: apellidoClean,
+                cedula: cedulaClean,
+            };
 
             setNombre("");
             setApellido("");
             setCedula("");
-            onSuccess(nuevo);
+
+            // 3. Pasar el objeto completo a onSuccess
+            onSuccess(nuevoObj);
             onClose();
         } catch (err) {
             console.error("Error al registrar domiciliario:", err);
