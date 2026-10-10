@@ -1,12 +1,54 @@
-import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
+import {
+    collection,
+    addDoc,
+    getDocs,
+    updateDoc,
+    doc,
+    query,
+    where,
+    onSnapshot,
+    serverTimestamp
+} from "firebase/firestore";
 import { db, auth } from "../firebase";
 import type { Domiciliario } from "../types";
 
 const COLECCION_DOMICILIARIOS = "domiciliarios";
 
 /**
- * Consulta la lista de domiciliarios en Firestore filtrando de manera exclusiva
- * por el identificador del inquilino (tenantId) correspondiente al usuario autenticado.
+ * Suscribe en tiempo real a los domiciliarios filtrados exclusivamente por el tenantId activo.
+ */
+export const subscribeDomiciliarios = (
+    onUpdate: (domiciliarios: Domiciliario[]) => void,
+    onError: (error: Error) => void
+) => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual) {
+        onError(new Error("Se requiere un usuario autenticado para consultar los domiciliarios."));
+        return () => { };
+    }
+
+    const q = query(
+        collection(db, COLECCION_DOMICILIARIOS),
+        where("tenantId", "==", usuarioActual.uid)
+    );
+
+    return onSnapshot(
+        q,
+        (snapshot) => {
+            const lista = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as Domiciliario[];
+            onUpdate(lista);
+        },
+        (error) => {
+            onError(error);
+        }
+    );
+};
+
+/**
+ * Obtiene de forma síncrona/promesa la lista de domiciliarios del tenant actual.
  */
 export const getDomiciliarios = async (): Promise<Domiciliario[]> => {
     const usuarioActual = auth.currentUser;
@@ -14,40 +56,37 @@ export const getDomiciliarios = async (): Promise<Domiciliario[]> => {
         throw new Error("Se requiere un usuario autenticado para consultar los domiciliarios.");
     }
 
-    const consultaDomiciliarios = query(
+    const q = query(
         collection(db, COLECCION_DOMICILIARIOS),
         where("tenantId", "==", usuarioActual.uid)
     );
+    const querySnapshot = await getDocs(q);
 
-    const snapshot = await getDocs(consultaDomiciliarios);
-    return snapshot.docs.map((doc) => ({
+    return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
     })) as Domiciliario[];
 };
 
 /**
- * Registra un nuevo domiciliario en Firestore asignándole el tenantId del usuario
- * activo actual para garantizar el aislamiento de datos multi-tenant.
+ * Crea un nuevo domiciliario inyectando el tenantId del usuario activo.
  */
-export const crearDomiciliario = async (
-    datos: Omit<Domiciliario, "id" | "createdAt">
-): Promise<Domiciliario> => {
+export const createDomiciliario = async (
+    datos: Omit<Domiciliario, "id" | "createdAt" | "tenantId">
+): Promise<string> => {
     const usuarioActual = auth.currentUser;
     if (!usuarioActual) {
-        throw new Error("Se requiere un usuario autenticado para registrar un domiciliario.");
+        throw new Error("Se requiere un usuario autenticado para crear un domiciliario.");
     }
 
-    const datosConTenant = {
+    const docRef = await addDoc(collection(db, COLECCION_DOMICILIARIOS), {
         ...datos,
         tenantId: usuarioActual.uid,
         createdAt: serverTimestamp(),
-    };
+    });
 
-    const docRef = await addDoc(collection(db, COLECCION_DOMICILIARIOS), datosConTenant);
-
-    return {
-        id: docRef.id,
-        ...datos,
-    } as Domiciliario;
+    return docRef.id;
 };
+
+// Aliases por compatibilidad si se llaman en español
+export const crearDomiciliario = createDomiciliario;
