@@ -9,7 +9,7 @@ import {
     orderBy,
     serverTimestamp
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import type { Orden, MotivoCategoria } from "../types";
 
 const COLLECTION_NAME = "ordenes";
@@ -23,16 +23,26 @@ export interface ConfirmarOrdenParams {
     motivoDetalle?: string;
 }
 
-// 1. Suscripción en tiempo real a las órdenes activas del turno (excluye las que ya pertenecen a un cierre)
+/**
+ * Suscribe en tiempo real a las órdenes activas del turno (excluye las liquidadas en un cierre)
+ * filtrando exclusivamente por el inquilino (tenantId) del usuario autenticado actual.
+ */
 export const subscribeOrdenesActivas = (
     onUpdate: (ordenes: Orden[]) => void,
     onError: (error: Error) => void
 ) => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual) {
+        onError(new Error("Se requiere un usuario autenticado para consultar las órdenes activas."));
+        return () => { };
+    }
+
     const ref = collection(db, COLLECTION_NAME);
 
-    // Consultamos únicamente órdenes activas que no han sido liquidadas en un cierre previo
+    // Consulta filtrada por tenantId, estado y sin cierre previo
     const q = query(
         ref,
+        where("tenantId", "==", usuarioActual.uid),
         where("status", "in", ["pendiente", "confirmado"]),
         where("cierreId", "==", null),
         orderBy("horaCreacion", "desc")
@@ -57,15 +67,28 @@ export const subscribeOrdenesActivas = (
     );
 };
 
-// 2. Suscripción en tiempo real a TODAS las órdenes (para Estadísticas e Históricos)
+/**
+ * Suscribe en tiempo real a TODAS las órdenes (para Estadísticas e Históricos)
+ * limitadas de manera exclusiva al tenant autenticado actual.
+ */
 export const subscribeTodasLasOrdenes = (
     onUpdate: (ordenes: Orden[]) => void,
     onError: (error: Error) => void
 ) => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual) {
+        onError(new Error("Se requiere un usuario autenticado para consultar el historial de órdenes."));
+        return () => { };
+    }
+
     const ref = collection(db, COLLECTION_NAME);
 
-    // Consultamos la totalidad de las órdenes ordenadas cronológicamente
-    const q = query(ref, orderBy("horaCreacion", "desc"));
+    // Consulta de la totalidad de órdenes del tenant ordenadas cronológicamente
+    const q = query(
+        ref,
+        where("tenantId", "==", usuarioActual.uid),
+        orderBy("horaCreacion", "desc")
+    );
 
     return onSnapshot(
         q,
@@ -86,28 +109,44 @@ export const subscribeTodasLasOrdenes = (
     );
 };
 
-// 3. Registrar nueva orden en la colección
-export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" | "status">) => {
+/**
+ * Registra una nueva orden inyectando el tenantId del usuario activo actual.
+ */
+export const createOrden = async (nuevaOrden: Omit<Orden, "id" | "horaCreacion" | "status" | "tenantId">) => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual) {
+        throw new Error("Se requiere un usuario autenticado para crear una orden.");
+    }
+
     const ref = collection(db, COLLECTION_NAME);
 
     const docRef = await addDoc(ref, {
         ...nuevaOrden,
         status: "pendiente",
-        cierreId: null, // Se inicializa sin asignación de cierre
+        cierreId: null,
+        tenantId: usuarioActual.uid,
         horaCreacion: serverTimestamp(),
     });
 
     return docRef.id;
 };
 
-// 4. Confirmar la recepción del punto de venta filtrando campos undefined
+/**
+ * Confirma la recepción del punto de venta filtrando campos undefined
+ * validando implícitamente la pertenencia mediante el UID activo.
+ */
 export const confirmarOrden = async (
     ordenId: string,
     datosConfirmacion: ConfirmarOrdenParams
 ) => {
+    const usuarioActual = auth.currentUser;
+    if (!usuarioActual) {
+        throw new Error("Se requiere un usuario autenticado para confirmar una orden.");
+    }
+
     const docRef = doc(db, COLLECTION_NAME, ordenId);
 
-    // Construimos el payload básico con valores definidos
+    // Construye el payload básico con valores definidos
     const updatePayload: Record<string, any> = {
         status: "confirmado",
         montoReal: datosConfirmacion.montoReal,
@@ -116,7 +155,7 @@ export const confirmarOrden = async (
         horaConfirmacion: serverTimestamp(),
     };
 
-    // Solo adjuntamos los campos opcionales si vienen definidos
+    // Adjunta los campos opcionales si vienen definidos
     if (datosConfirmacion.motivoCategoria !== undefined) {
         updatePayload.motivoCategoria = datosConfirmacion.motivoCategoria;
     }
