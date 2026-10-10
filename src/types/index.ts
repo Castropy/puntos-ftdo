@@ -4,7 +4,7 @@ import { Timestamp } from "firebase/firestore";
 export type PuntoId = 'A1' | 'A2' | 'A3' | 'A4';
 
 // Define el estado operativo actual de una orden registrada
-export type OrdenStatus = 'pendiente' | 'confirmado';
+export type OrdenStatus = 'pendiente' | 'confirmado' | 'cerrado';
 
 // Define las categorías predeterminadas para los motivos de discrepancia monetaria
 export type MotivoCategoria =
@@ -20,6 +20,7 @@ export interface Domiciliario {
     apellido: string;
     cedula: string;
     createdAt?: Timestamp;
+    tenantId?: string; // Identificador del inquilino (tenant) para aislamiento multi-tenant
 }
 
 // Estructura de datos para la entidad de Orden
@@ -38,6 +39,7 @@ export interface Orden {
     horaCreacion: Timestamp;
     horaConfirmacion?: Timestamp;
     cierreId?: string;
+    tenantId?: string; // Identificador del inquilino (tenant) para aislamiento multi-tenant
 }
 
 // Estructura de datos para el registro de Cierre de Caja
@@ -49,6 +51,7 @@ export interface CierreCaja {
     totalMonto: number;
     totalPedidos: number;
     usuarioCierreId: string;
+    tenantId?: string; // Identificador del inquilino (tenant) para aislamiento multi-tenant
 }
 
 // Contexto global del estado de autenticación de usuario
