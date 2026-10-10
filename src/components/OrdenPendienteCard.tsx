@@ -2,6 +2,7 @@ import React from "react";
 import { Clock, CreditCard, User, ArrowRightCircle } from "lucide-react";
 import type { Orden } from "../types";
 import { formatBolivares } from "../utils/formatters";
+import { capitalizeWords } from "../utils/textFormatters";
 
 // Definición de las propiedades del componente
 interface OrdenPendienteCardProps {
@@ -29,6 +30,8 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
     orden,
     onConfirmar,
 }) => {
+    const nombreDomiciliarioFormateado = capitalizeWords(orden.domiciliarioNombreCompleto || "");
+
     return (
         <div className="bg-amber-50/20 rounded-lg border border-amber-200 border-l-4 border-l-amber-500 shadow-sm p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
             <div className="space-y-3">
@@ -43,11 +46,11 @@ export const OrdenPendienteCard: React.FC<OrdenPendienteCardProps> = ({
                     </div>
                 </div>
 
-                {/* Información del domiciliario y monto a recibir */}
+                {/* Información del domiciliario formateada y monto a recibir */}
                 <div className="space-y-1.5">
                     <div className="flex items-center text-sm font-medium text-farmatodo-textPrimary space-x-2">
                         <User className="w-4 h-4 text-farmatodo-blue flex-shrink-0" />
-                        <span className="truncate">{orden.domiciliarioNombreCompleto}</span>
+                        <span className="truncate">{nombreDomiciliarioFormateado}</span>
                     </div>
 
                     <div className="flex items-center text-lg font-bold text-farmatodo-blue space-x-2 pt-1">

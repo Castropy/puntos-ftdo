@@ -2,6 +2,7 @@ import React from "react";
 import { CheckCircle2, AlertTriangle, Clock, User, Timer } from "lucide-react";
 import type { Orden } from "../types";
 import { formatBolivares } from "../utils/formatters";
+import { capitalizeWords } from "../utils/textFormatters";
 
 interface OrdenConfirmadaCardProps {
     orden: Orden;
@@ -43,6 +44,7 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
     const horaSalida = formatHora(orden.horaCreacion);
     const horaLlegada = formatHora(orden.horaConfirmacion || orden.horaCreacion);
     const duracion = calcularDuracion(orden.horaCreacion, orden.horaConfirmacion);
+    const nombreDomiciliarioFormateado = capitalizeWords(orden.domiciliarioNombreCompleto || "");
 
     return (
         <div
@@ -74,11 +76,11 @@ export const OrdenConfirmadaCard: React.FC<OrdenConfirmadaCardProps> = ({ orden 
                     </span>
                 </div>
 
-                {/* Nombre del Domiciliario */}
+                {/* Nombre del Domiciliario Formateado */}
                 <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-1.5 text-farmatodo-textPrimary font-medium truncate">
                         <User className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{orden.domiciliarioNombreCompleto}</span>
+                        <span className="truncate">{nombreDomiciliarioFormateado}</span>
                     </div>
                 </div>
 
